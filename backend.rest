@@ -1,0 +1,9 @@
+GET http://localhost:3000/trips
+
+#####
+POST http://localhost:3000/buses
+Content-Type: application/json
+
+{
+ 
+}

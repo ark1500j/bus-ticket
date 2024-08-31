@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or your database provider
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id      Int    @id @unique @default(autoincrement())
+  name    String
+  email   String @unique
+  Company String
+  buses   Bus[]
+  trips   Trip[]
+}
+
+model Trip {
+  id            Int       @id @default(autoincrement())
+  type          TripType
+  admin         Admin     @relation(fields: [adminEmail], references: [email])
+  adminEmail    String
+  from          String
+  to            String
+  departureDate DateTime
+  arrivalTime   DateTime // Changed to DateTime for consistency
+  returnDate    DateTime?
+  amount        String // Assuming 'Money' type can be represented by Float
+  numberOfSeats Int
+  seatsBooked   String[] // Array of seat numbers as strings
+  bus           Bus       @relation(fields: [busNumber], references: [busNumber])
+  busNumber     String
+  stops         String[]
+  bookings      Booking[] @relation("TripBookings")
+}
+
+model Booking {
+  id                     Int      @id @default(autoincrement())
+  seatNumbers            String[] // Array of seat numbers as strings
+  email                  String //user email
+  adults                 Adult[]
+  children               Child[]
+  notes                  String?
+  additionalLuggageCount Int
+  specialLuggageCount    Int
+  totalAmount            String
+  trip                   Trip     @relation("TripBookings", fields: [tripId], references: [id])
+  tripId                 Int
+}
+
+model Adult {
+  id        Int     @id @default(autoincrement())
+  firstName String
+  lastName  String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  bookingId Int
+}
+
+model Child {
+  id        Int     @id @default(autoincrement())
+  firstName String
+  lastName  String
+  booking   Booking @relation(fields: [bookingId], references: [id])
+  bookingId Int
+}
+
+model Bus {
+  id              Int      @id @default(autoincrement())
+  busNumber       String   @unique
+  status          String
+  lastMaintenance DateTime
+  createdAt       DateTime @default(now())
+  admin           Admin    @relation(fields: [adminEmail], references: [email])
+  adminEmail      String
+  trips           Trip[]
+}
+
+enum TripType {
+  OneWay
+  RoundTrip
+}
